@@ -1,8 +1,6 @@
 import socketserver
 import threading
 
-from constants import SERVER_ADDRESS, SERVER_PORT
-
 
 class RequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
@@ -20,8 +18,8 @@ class Server(socketserver.TCPServer):
 
 
 class DataReceiver:
-    def __init__(self):
-        self.address = (SERVER_ADDRESS, SERVER_PORT)
+    def __init__(self, config):
+        self.address = (config.sender_ip, config.connection_port)
         self.server = Server(self.address, RequestHandler)
 
     def start_receiving(self):
