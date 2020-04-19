@@ -2,38 +2,52 @@ import sys
 from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QPushButton, QLabel, QGridLayout, QProgressBar, \
     QRadioButton, QLineEdit
 
+from core.connection_config import ConnectionConfig
 
-class EntryApp(QWidget):
+
+class ConfigApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.key = ''
+        self.config = ConnectionConfig()
+        self.access_key = ''
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
-        self.textbox = QLineEdit()
-        self.label = QLabel("Please provide an access key, which will be used to encrypt RSA key:")
+        self.sender_ip_textbox = QLineEdit()
+        self.receiver_ip_textbox = QLineEdit()
+        self.access_key_textbox = QLineEdit()
+        self.sender_ip_label = QLabel("Provide your IP address:")
+        self.receiver_ip_label = QLabel("Provide receiver's IP address:")
+        self.access_key_label = QLabel("Please provide an access key, which will be used to encrypt RSA key:")
         self.confirm_button = QPushButton('Confirm')
         self._add_widgets()
 
         self.setLayout(self.layout)
-        self.setGeometry(700, 400, 400, 100)
+        self.setGeometry(1000, 600, 200, 100)
         self.setWindowTitle('Welcome!')
         self.confirm_button.clicked.connect(self._confirm_click)
         self.show()
 
     def _confirm_click(self):
-        self.key = self.textbox.text()
+        self.access_key = self.access_key_textbox.text()
+        self.config.sender_ip = self.sender_ip_textbox.text()
+        self.config.receiver_ip = self.receiver_ip_textbox.text()
         self.hide()
-        self.main_app = MainApp()
+        self.main_app = MainApp(self.config)
 
     def _add_widgets(self):
-        self.layout.addWidget(self.label, 0, 0)
-        self.layout.addWidget(self.textbox, 1, 0)
-        self.layout.addWidget(self.confirm_button, 1, 1)
+        self.layout.addWidget(self.sender_ip_label, 0, 0)
+        self.layout.addWidget(self.receiver_ip_label, 0, 1)
+        self.layout.addWidget(self.sender_ip_textbox, 1, 0)
+        self.layout.addWidget(self.receiver_ip_textbox, 1, 1)
+        self.layout.addWidget(self.access_key_label, 2, 0)
+        self.layout.addWidget(self.access_key_textbox, 3, 0)
+        self.layout.addWidget(self.confirm_button, 4, 0)
 
 
 class MainApp(QWidget):
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
         self.browse_button = QPushButton('Browse')
@@ -72,5 +86,5 @@ class MainApp(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    start = EntryApp()
+    start = ConfigApp()
     sys.exit(app.exec_())

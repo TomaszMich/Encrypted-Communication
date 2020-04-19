@@ -1,6 +1,6 @@
 import socket
 import logging
-from fsplit.filesplit import FileSplit
+# from fsplit.filesplit import FileSplit
 
 log = logging.getLogger(__name__)
 
@@ -17,6 +17,6 @@ class DataSender:
             log.info(f"Sending {data}")
             sock.send(data)
 
-    def split_data(self, filename):
-        fs = FileSplit(filename, 5)
-        fs.split()
+    # def split_data(self, filename):
+    #     fs = FileSplit(filename, 5)
+    #     fs.split()

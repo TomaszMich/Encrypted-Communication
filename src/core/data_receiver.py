@@ -13,12 +13,9 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
 
 class Server(socketserver.TCPServer):
-    def __init__(self, server_address,
-                 handler_class=RequestHandler,
-                 ):
+    def __init__(self, server_address, handler_class=RequestHandler):
         print("Init of the server")
-        socketserver.TCPServer.__init__(self, server_address,
-                                        handler_class)
+        socketserver.TCPServer.__init__(self, server_address, handler_class)
         return
 
 
