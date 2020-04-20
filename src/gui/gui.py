@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QPushButton, QLabel, QGridLayout, QProgressBar, \
     QRadioButton, QLineEdit
 
-from core.connection_config import ConnectionConfig
+from src.core.connection_config import ConnectionConfig
 
 
 class ConfigApp(QWidget):
@@ -82,6 +82,30 @@ class MainApp(QWidget):
         self.layout.addWidget(self.radio_button_cfb, 3, 0)
         self.layout.addWidget(self.radio_button_ofb, 4, 0)
         self.layout.addWidget(self.dynamic_message, 1, 1, 1, 3)
+
+
+class ReceivedWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QGridLayout()
+        self.layout.setSpacing(10)
+        self.proceed_button = QPushButton("Ok")
+        self.message_received = QLabel("Placeholder")
+
+        self.setLayout(self.layout)
+        self.setGeometry(700, 400, 300, 100)
+        self.setWindowTitle('Received a file')
+        self._add_widgets()
+
+        self.proceed_button.clicked.connect(self._confirm_click)
+        self.show()
+
+    def _add_widgets(self):
+        self.layout.addWidget(self.proceed_button, 1, 1, 1, 1)
+        self.layout.addWidget(self.message_received, 0, 0)
+
+    def _confirm_click(self):
+        self.hide()
 
 
 if __name__ == "__main__":
