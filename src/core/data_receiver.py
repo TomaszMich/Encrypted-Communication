@@ -6,6 +6,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request.recv(4096)
         print(data)
+        # TODO window with received data opens
         self.request.send("Received data".encode())
         return
 
@@ -23,10 +24,9 @@ class DataReceiver:
         self.server = Server(self.address, RequestHandler)
 
     def start_receiving(self):
-        self.server.serve_forever()
-        # rcv_thread = threading.Thread(target=self.server.serve_forever)
-        # rcv_thread.setDaemon(True)
-        # rcv_thread.start()
+        rcv_thread = threading.Thread(target=self.server.serve_forever)
+        rcv_thread.setDaemon(True)
+        rcv_thread.start()
 
     def stop_receiving(self):
         self.server.shutdown()
