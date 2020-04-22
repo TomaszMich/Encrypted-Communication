@@ -1,8 +1,11 @@
 import sys
+import hashlib
 from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QPushButton, QLabel, QGridLayout, QProgressBar, \
     QRadioButton, QLineEdit
 
 from src.core.connection_config import ConnectionConfig
+from src.core.data_receiver import DataReceiver
+from src.core.data_sender import DataSender
 
 
 class ConfigApp(QWidget):
@@ -43,6 +46,9 @@ class ConfigApp(QWidget):
         self.layout.addWidget(self.access_key_textbox, 3, 0)
         self.layout.addWidget(self.confirm_button, 4, 0)
 
+    def _hash_access_key(self, key):
+        return int(hashlib.sha256(key.encode('utf-8')).hexdigest(), 16)
+
 
 class MainApp(QWidget):
     def __init__(self, config):
@@ -60,18 +66,25 @@ class MainApp(QWidget):
         self.dynamic_message = QLabel('Please select mode and file')
         self._add_widgets()
 
+        self.file_path = ""
+
         self.setLayout(self.layout)
         self.setGeometry(700, 400, 400, 200)
         self.setWindowTitle('Jakub Wlostowski & Tomasz Michalski')
 
         self.browse_button.clicked.connect(self._browse_files)
+        self.send_button.clicked.connect(self._send_file)
         self.show()
+        self.server = DataReceiver(self.config)
+        self.server.start_receiving()
+
+        self.client = DataSender(self.config)
 
     def _browse_files(self):
         filename = QFileDialog.getOpenFileName()
         path = filename[0]
         self.dynamic_message.setText(f"Selected file:\n{path}")
-        return path
+        self.file_path = path
 
     def _add_widgets(self):
         self.layout.addWidget(self.browse_button, 4, 3)
@@ -82,6 +95,10 @@ class MainApp(QWidget):
         self.layout.addWidget(self.radio_button_cfb, 3, 0)
         self.layout.addWidget(self.radio_button_ofb, 4, 0)
         self.layout.addWidget(self.dynamic_message, 1, 1, 1, 3)
+
+    def _send_file(self):
+        self.client.send_file(self.file_path, self.progress_bar)
+        self.client.send_data(bytes(self.file_path, encoding="utf-8"))
 
 
 class ReceivedWindow(QWidget):
