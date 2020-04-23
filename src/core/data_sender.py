@@ -12,14 +12,13 @@ BUFFER_SIZE = 4096
 class DataSender:
     def __init__(self, config):
         self.address = (config.receiver_ip, config.connection_port)
-        #self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def send_data(self, data):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+    def send_message(self, message):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             log.info(f"Connecting to {self.address}")
-            sock.connect(self.address)
-            log.info(f"Sending {data}")
-            sock.send(data)
+            s.connect(self.address)
+            log.info(f"Sending {message}")
+            s.send(message.encode())
 
     def send_file(self, filename, progress_bar):
         file_size = os.path.getsize(filename)
