@@ -1,5 +1,4 @@
 import sys
-import hashlib
 from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QPushButton, QLabel, QGridLayout, QProgressBar, \
     QRadioButton, QLineEdit, QPlainTextEdit
 
@@ -46,8 +45,7 @@ class ConfigApp(QWidget):
         self.layout.addWidget(self.access_key_textbox, 3, 0)
         self.layout.addWidget(self.confirm_button, 4, 0)
 
-    def _hash_access_key(self, key):
-        return int(hashlib.sha256(key.encode('utf-8')).hexdigest(), 16)
+
 
 
 class MainApp(QWidget):
