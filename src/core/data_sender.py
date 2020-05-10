@@ -1,6 +1,7 @@
 import socket
 import logging
 import os
+import hashlib
 from fsplit.filesplit import FileSplit
 
 log = logging.getLogger(__name__)
@@ -39,3 +40,35 @@ class DataSender:
     def split_data(self, filename):
         fs = FileSplit(filename, 5)
         fs.split()
+
+    def generate_session_key():
+        random_key = os.urandom(16)
+        return random_key
+
+    def hash_access_key(key):
+        return str(hashlib.sha256(key).hexdigest())
+
+    def generate_private_key(passcode):
+        from Cryptodome.PublicKey import RSA
+        key = RSA.generate(2048)
+        encrypted_key = key.export_key(passphrase=passcode, pkcs=8, protection="scryptAndAES128-CBC")
+        dir_name = 'C:\private_key'
+        try:
+            os.mkdir(dir_name)
+            with open('C:\private_key\private_key.bin', 'wb') as f:
+                f.write(encrypted_key)
+        except FileExistsError:
+            with open('C:\private_key\private_key.bin', 'wb') as f:
+                f.write(encrypted_key)
+
+    def generate_public_key():
+        from Cryptodome.PublicKey import RSA
+        key = RSA.generate(2048)
+        dir_name = 'C:\public_key'
+        try:
+            os.mkdir(dir_name)
+            with open('C:\public_key\public_key.pem', 'wb') as f:
+                f.write(key.publickey().export_key())
+        except FileExistsError:
+            with open('C:\public_key\public_key.pem', 'wb') as f:
+                f.write(key.publickey().export_key())
