@@ -46,8 +46,6 @@ class ConfigApp(QWidget):
         self.layout.addWidget(self.confirm_button, 4, 0)
 
 
-
-
 class MainApp(QWidget):
     def __init__(self, config):
         super().__init__()
@@ -75,6 +73,7 @@ class MainApp(QWidget):
         self.setWindowTitle('Jakub Wlostowski & Tomasz Michalski')
 
         self.browse_button.clicked.connect(self._browse_files)
+        self.send_file_button.clicked.connect(self._send_file)
         self.send_message_button.clicked.connect(self._send_message)
         self.show()
 
@@ -98,7 +97,6 @@ class MainApp(QWidget):
 
     def _send_file(self):
         self.sender.send_file(self.file_path, self.progress_bar)
-        self.sender.send_data(bytes(self.file_path, encoding="utf-8"))
 
     def _send_message(self):
         message = self.message_textbox.toPlainText()
