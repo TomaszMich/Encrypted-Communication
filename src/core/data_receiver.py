@@ -1,47 +1,24 @@
 import os
 import socketserver
 import threading
+import tkinter
+from tkinter import messagebox
 
-from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QGridLayout
 from src.utils.constants import SEPARATOR, BUFFER_SIZE
-
-
-class ReceivedWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.layout = QGridLayout()
-        self.layout.setSpacing(10)
-        self.proceed_button = QPushButton("Ok")
-        self.message_received = QLabel("Placeholder")
-
-        self.setLayout(self.layout)
-        self.setGeometry(700, 400, 300, 100)
-        self.setWindowTitle('Received a file')
-        self._add_widgets()
-
-        self.proceed_button.clicked.connect(self._confirm_click)
-        self.show()
-
-    def _add_widgets(self):
-        self.layout.addWidget(self.proceed_button, 1, 1, 1, 1)
-        self.layout.addWidget(self.message_received, 0, 0)
-
-    def _confirm_click(self):
-        self.hide()
 
 
 class RequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data = self.request.recv(BUFFER_SIZE).decode()
+        root = tkinter.Tk()
+        root.withdraw()
         if SEPARATOR in data:
             self._handle_file(data)
         else:
             self._handle_message(data)
 
-        # window = ReceivedWindow()
-
     def _handle_message(self, message):
-        print(f"Message: {message}")
+        messagebox.showinfo(title="Received a message", message=f"New message:\n{message}")
 
     def _handle_file(self, header):
         filename, filesize = header.split(SEPARATOR)
@@ -57,8 +34,8 @@ class RequestHandler(socketserver.BaseRequestHandler):
                 if not bytes_read:
                     break
                 file.write(bytes_read)
-        # window = ReceivedWindow()
-        return
+
+        messagebox.showinfo(title="Received a file", message=f"New file: {filename}")
 
 
 class Server(socketserver.TCPServer):
