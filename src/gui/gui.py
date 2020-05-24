@@ -1,5 +1,5 @@
-import sys
-from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QPushButton, QLabel, QGridLayout, QProgressBar, \
+from Cryptodome.Cipher.AES import MODE_ECB, MODE_CBC, MODE_CFB, MODE_OFB
+from PyQt5.QtWidgets import QFileDialog, QWidget, QPushButton, QLabel, QGridLayout, QProgressBar, \
     QRadioButton, QLineEdit, QPlainTextEdit
 
 from src.core.connection_config import ConnectionConfig
@@ -15,7 +15,9 @@ class ConfigApp(QWidget):
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
         self.sender_ip_textbox = QLineEdit()
+        self.sender_ip_textbox.setText("25.119.38.155")
         self.receiver_ip_textbox = QLineEdit()
+        self.receiver_ip_textbox.setText("25.66.64.255")
         self.access_key_textbox = QLineEdit()
         self.sender_ip_label = QLabel("Provide your IP address:")
         self.receiver_ip_label = QLabel("Provide receiver's IP address:")
@@ -49,11 +51,12 @@ class ConfigApp(QWidget):
 class MainApp(QWidget):
     def __init__(self, config):
         super().__init__()
+        self.encryption_mode = MODE_ECB
         self.file_path = ""
         self.config = config
-        self.sender = DataSender(config)
-        self.receiver = DataReceiver(config)
-        self.receiver.start_receiving()
+        self.data_sender = DataSender(config)
+        self.data_receiver = DataReceiver(config)
+        self.data_receiver.start_receiving()
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
         self.browse_button = QPushButton('Browse')
@@ -75,6 +78,16 @@ class MainApp(QWidget):
         self.browse_button.clicked.connect(self._browse_files)
         self.send_file_button.clicked.connect(self._send_file)
         self.send_message_button.clicked.connect(self._send_message)
+        self.radio_button_ecb.setChecked(True)
+        self.radio_button_ecb.mode = MODE_ECB
+        self.radio_button_cbc.mode = MODE_CBC
+        self.radio_button_cfb.mode = MODE_CFB
+        self.radio_button_ofb.mode = MODE_OFB
+        self.radio_button_ecb.toggled.connect(self._set_encryption_mode)
+        self.radio_button_cbc.toggled.connect(self._set_encryption_mode)
+        self.radio_button_cfb.toggled.connect(self._set_encryption_mode)
+        self.radio_button_ofb.toggled.connect(self._set_encryption_mode)
+
         self.show()
 
     def _browse_files(self):
@@ -96,38 +109,22 @@ class MainApp(QWidget):
         self.layout.addWidget(self.send_message_button, 5, 4)
 
     def _send_file(self):
-        self.sender.send_file(self.file_path, self.progress_bar)
+        if self.file_path == "":
+            self.dynamic_message.setText("Select file to send")
+            return
+        self.data_sender.send_file(self.file_path, self.progress_bar)
 
     def _send_message(self):
         message = self.message_textbox.toPlainText()
-        self.sender.send_message(message)
+        self.data_sender.send_message(message)
 
-
-class ReceivedWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.layout = QGridLayout()
-        self.layout.setSpacing(10)
-        self.proceed_button = QPushButton("Ok")
-        self.message_received = QLabel("Placeholder")
-
-        self.setLayout(self.layout)
-        self.setGeometry(700, 400, 300, 100)
-        self.setWindowTitle('Received a file')
-        self._add_widgets()
-
-        self.proceed_button.clicked.connect(self._confirm_click)
-        self.show()
-
-    def _add_widgets(self):
-        self.layout.addWidget(self.proceed_button, 1, 1, 1, 1)
-        self.layout.addWidget(self.message_received, 0, 0)
-
-    def _confirm_click(self):
-        self.hide()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    start = ConfigApp()
-    sys.exit(app.exec_())
+    def _set_encryption_mode(self):
+        text = self.sender().text()
+        if text == "ECB":
+            self.encryption_mode = MODE_ECB
+        if text == "CBC":
+            self.encryption_mode = MODE_CBC
+        if text == "CFB":
+            self.encryption_mode = MODE_CFB
+        if text == "OFB":
+            self.encryption_mode = MODE_OFB
