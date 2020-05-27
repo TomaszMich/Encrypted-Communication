@@ -1,10 +1,12 @@
 from Cryptodome.Cipher.AES import MODE_ECB, MODE_CBC, MODE_CFB, MODE_OFB
 from PyQt5.QtWidgets import QFileDialog, QWidget, QPushButton, QLabel, QGridLayout, QProgressBar, \
     QRadioButton, QLineEdit, QPlainTextEdit
+import os
 
 from src.core.connection_config import ConnectionConfig
 from src.core.data_receiver import DataReceiver
 from src.core.data_sender import DataSender
+from src.core import encryption
 
 
 class ConfigApp(QWidget):
@@ -36,7 +38,7 @@ class ConfigApp(QWidget):
         self.config.sender_ip = self.sender_ip_textbox.text()
         self.config.receiver_ip = self.receiver_ip_textbox.text()
         self.hide()
-        self.main_app = MainApp(self.config)
+        self.main_app = MainApp(self.config, self.access_key)
 
     def _add_widgets(self):
         self.layout.addWidget(self.sender_ip_label, 0, 0)
@@ -49,10 +51,11 @@ class ConfigApp(QWidget):
 
 
 class MainApp(QWidget):
-    def __init__(self, config):
+    def __init__(self, config, access_key):
         super().__init__()
         self.encryption_mode = MODE_ECB
         self.file_path = ""
+        self.access_key = access_key
         self.config = config
         self.data_sender = DataSender(config)
         self.data_receiver = DataReceiver(config)
@@ -62,6 +65,7 @@ class MainApp(QWidget):
         self.browse_button = QPushButton('Browse')
         self.send_file_button = QPushButton('Send file')
         self.send_message_button = QPushButton("Send message")
+        self.exchange_keys_button = QPushButton("Exchange keys")
         self.radio_button_ecb = QRadioButton('ECB')
         self.radio_button_cbc = QRadioButton('CBC')
         self.radio_button_cfb = QRadioButton('CFB')
@@ -78,6 +82,7 @@ class MainApp(QWidget):
         self.browse_button.clicked.connect(self._browse_files)
         self.send_file_button.clicked.connect(self._send_file)
         self.send_message_button.clicked.connect(self._send_message)
+        self.exchange_keys_button.clicked.connect(self._exchange_keys)
         self.radio_button_ecb.setChecked(True)
         self.radio_button_ecb.mode = MODE_ECB
         self.radio_button_cbc.mode = MODE_CBC
@@ -99,6 +104,7 @@ class MainApp(QWidget):
     def _add_widgets(self):
         self.layout.addWidget(self.browse_button, 4, 3)
         self.layout.addWidget(self.send_file_button, 4, 4)
+        self.layout.addWidget(self.exchange_keys_button, 3, 3)
         self.layout.addWidget(self.progress_bar, 0, 0, 1, 0)
         self.layout.addWidget(self.radio_button_ecb, 1, 0)
         self.layout.addWidget(self.radio_button_cbc, 2, 0)
@@ -112,11 +118,14 @@ class MainApp(QWidget):
         if self.file_path == "":
             self.dynamic_message.setText("Select file to send")
             return
-        self.data_sender.send_file(self.file_path, self.progress_bar)
+        encrypted_file = encryption.encrypt_file(self.file_path, self.encryption_mode)
+        self.data_sender.send_file(encrypted_file, self.progress_bar)
 
     def _send_message(self):
         message = self.message_textbox.toPlainText()
-        self.data_sender.send_message(message)
+        encrypted_file = encryption.encrypt_message(message, self.encryption_mode)
+        self.data_sender.send_file(encrypted_file, self.progress_bar)
+        # self.data_sender.send_message(message)
 
     def _set_encryption_mode(self):
         text = self.sender().text()
@@ -128,3 +137,7 @@ class MainApp(QWidget):
             self.encryption_mode = MODE_CFB
         if text == "OFB":
             self.encryption_mode = MODE_OFB
+
+    def _exchange_keys(self):
+        encryption.generate_private_and_public_keys(self.access_key)
+        self.data_sender.send_file(os.path.join(os.pardir, "keys", "public", "my_public.pem"), self.progress_bar)

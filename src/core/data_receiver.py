@@ -5,6 +5,7 @@ import tkinter
 from tkinter import messagebox
 
 from src.utils.constants import SEPARATOR, BUFFER_SIZE
+from src.core import encryption
 
 
 class RequestHandler(socketserver.BaseRequestHandler):
@@ -24,16 +25,23 @@ class RequestHandler(socketserver.BaseRequestHandler):
         filename, filesize = header.split(SEPARATOR)
         filename = os.path.basename(filename)
 
-        downloads = os.path.join(os.pardir, "downloads")
-        if not os.path.exists(downloads):
-            os.mkdir(downloads)
+        if filename.endswith(".pem"):
+            file_path = os.path.join(os.pardir, "keys", "public")
+            filename = "receiver.pem"
+        else:
+            file_path = os.path.join(os.pardir, "downloads")
+        if not os.path.exists(file_path):
+            os.mkdir(file_path)
 
-        with open(os.path.join(os.pardir, "downloads", filename), "wb") as file:
+        with open(os.path.join(file_path, filename), "wb") as file:
             while True:
                 bytes_read = self.request.recv(BUFFER_SIZE)
                 if not bytes_read:
                     break
                 file.write(bytes_read)
+
+        if filename != "receiver.pem":
+            encryption.decrypt_data(os.path.join(file_path, filename))
 
         messagebox.showinfo(title="Received a file", message=f"New file: {filename}")
 
