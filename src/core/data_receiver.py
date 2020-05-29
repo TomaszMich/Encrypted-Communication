@@ -4,7 +4,7 @@ import threading
 import tkinter
 from tkinter import messagebox
 
-from src.utils.constants import SEPARATOR, BUFFER_SIZE
+from src.utils.constants import SEPARATOR, BUFFER_SIZE, MESSAGE
 from src.core import encryption
 
 
@@ -43,7 +43,8 @@ class RequestHandler(socketserver.BaseRequestHandler):
         if filename != "receiver.pem":
             encryption.decrypt_data(os.path.join(file_path, filename))
 
-        messagebox.showinfo(title="Received a file", message=f"New file: {filename}")
+        if filename != MESSAGE:
+            messagebox.showinfo(title="Received a file", message=f"New file: {filename}")
 
 
 class Server(socketserver.TCPServer):

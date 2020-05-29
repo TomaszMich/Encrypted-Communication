@@ -7,6 +7,7 @@ from src.core.connection_config import ConnectionConfig
 from src.core.data_receiver import DataReceiver
 from src.core.data_sender import DataSender
 from src.core import encryption
+from src.utils.constants import MESSAGE
 
 
 class ConfigApp(QWidget):
@@ -126,7 +127,7 @@ class MainApp(QWidget):
     def _send_message(self):
         message = self.message_textbox.toPlainText()
         encrypted_file = encryption.encrypt_message(message, self.encryption_mode)
-        self.data_sender.send_file(encrypted_file, "message", self.progress_bar)
+        self.data_sender.send_file(encrypted_file, MESSAGE, self.progress_bar)
 
     def _set_encryption_mode(self):
         text = self.sender().text()
