@@ -120,12 +120,13 @@ class MainApp(QWidget):
             self.dynamic_message.setText("Select file to send")
             return
         encrypted_file = encryption.encrypt_file(self.file_path, self.encryption_mode)
-        self.data_sender.send_file(encrypted_file, self.progress_bar)
+        original_name = os.path.basename(self.file_path)
+        self.data_sender.send_file(encrypted_file, original_name, self.progress_bar)
 
     def _send_message(self):
         message = self.message_textbox.toPlainText()
         encrypted_file = encryption.encrypt_message(message, self.encryption_mode)
-        self.data_sender.send_file(encrypted_file, self.progress_bar)
+        self.data_sender.send_file(encrypted_file, "message", self.progress_bar)
 
     def _set_encryption_mode(self):
         text = self.sender().text()

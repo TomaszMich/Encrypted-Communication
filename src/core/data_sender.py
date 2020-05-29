@@ -14,7 +14,7 @@ class DataSender:
             s.connect(self.address)
             s.send(message.encode())
 
-    def send_file(self, filename, progress_bar):
+    def send_file(self, filename, original_name, progress_bar):
         if filename == "":
             print("Nie wybrano pliku")
             return
@@ -22,7 +22,7 @@ class DataSender:
         bytes_read_size = 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(self.address)
-            s.send(f"{filename}{SEPARATOR}{file_size}".ljust(BUFFER_SIZE).encode())
+            s.send(f"{original_name}{SEPARATOR}{file_size}".ljust(BUFFER_SIZE).encode())
             with open(filename, "rb") as file:
                 while True:
                     bytes_read = file.read(BUFFER_SIZE)

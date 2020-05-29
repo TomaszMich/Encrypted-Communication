@@ -4,7 +4,8 @@ import tempfile
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Cipher import AES, PKCS1_OAEP
-
+import tkinter
+from tkinter import messagebox
 
 def hash_access_key(key):
     return str(hashlib.sha256(key.encode()).hexdigest())
@@ -80,4 +81,9 @@ def decrypt_data(encrypted_file):
     # TODO send and receive MODE_X
     cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
     data = cipher_aes.decrypt_and_verify(ciphertext, tag)
-    print(data.decode("utf-8"))
+
+    if os.path.basename(encrypted_file) == "message":
+        messagebox.showinfo(title="Received a message", message=f"New message:\n{data}")
+
+    with open(encrypted_file, "wb") as decrypted_file:
+        decrypted_file.write(data)
