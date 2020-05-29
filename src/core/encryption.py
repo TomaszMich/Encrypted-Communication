@@ -4,12 +4,12 @@ import tempfile
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Cipher import AES, PKCS1_OAEP
-import tkinter
 from src.utils.constants import MESSAGE
 from tkinter import messagebox
 
+
 def hash_access_key(key):
-    return str(hashlib.sha256(key.encode()).hexdigest())
+    return str(hashlib.sha256(key.encode()).digest())
 
 
 def generate_private_and_public_keys(access_key):
@@ -19,7 +19,7 @@ def generate_private_and_public_keys(access_key):
     hashed_access_key = hash_access_key(access_key)
 
     key = RSA.generate(2048)
-    private_key = key.export_key()
+    private_key = key.export_key(passphrase=hashed_access_key)
     public_key = key.publickey().export_key()
     with open(os.path.join(private_dir, "private.pem"), "wb") as private_key_file:
         private_key_file.write(private_key)
@@ -66,9 +66,9 @@ def _encrypt_data(data, mode=AES.MODE_EAX):
     return encrypted_file
 
 
-def decrypt_data(encrypted_file):
+def decrypt_data(encrypted_file, access_key):
     private_dir = os.path.join(os.pardir, "keys", "private", "private.pem")
-    private_key = RSA.import_key(open(private_dir).read())
+    private_key = RSA.import_key(open(private_dir).read(), passphrase=hash_access_key(access_key))
 
     with open(encrypted_file, "rb") as file_in:
         enc_session_key, nonce, tag, ciphertext = \

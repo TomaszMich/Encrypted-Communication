@@ -60,7 +60,7 @@ class MainApp(QWidget):
         self.access_key = access_key
         self.config = config
         self.data_sender = DataSender(config)
-        self.data_receiver = DataReceiver(config)
+        self.data_receiver = DataReceiver(config, access_key)
         self.data_receiver.start_receiving()
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
@@ -142,4 +142,4 @@ class MainApp(QWidget):
 
     def _exchange_keys(self):
         encryption.generate_private_and_public_keys(self.access_key)
-        self.data_sender.send_file(os.path.join(os.pardir, "keys", "public", "my_public.pem"), self.progress_bar)
+        self.data_sender.send_file(os.path.join(os.pardir, "keys", "public", "my_public.pem"), "my_public.pem", self.progress_bar)

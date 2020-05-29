@@ -7,6 +7,8 @@ from tkinter import messagebox
 from src.utils.constants import SEPARATOR, BUFFER_SIZE, MESSAGE
 from src.core import encryption
 
+key = None
+
 
 class RequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
@@ -41,7 +43,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
                 file.write(bytes_read)
 
         if filename != "receiver.pem":
-            encryption.decrypt_data(os.path.join(file_path, filename))
+            encryption.decrypt_data(os.path.join(file_path, filename), key)
 
         if filename != MESSAGE:
             messagebox.showinfo(title="Received a file", message=f"New file: {filename}")
@@ -55,9 +57,11 @@ class Server(socketserver.TCPServer):
 
 
 class DataReceiver:
-    def __init__(self, config):
+    def __init__(self, config, access_key):
         self.address = (config.sender_ip, config.connection_port)
         self.server = Server(self.address, RequestHandler)
+        global key
+        key = access_key
 
     def start_receiving(self):
         rcv_thread = threading.Thread(target=self.server.serve_forever)
