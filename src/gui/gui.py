@@ -19,7 +19,7 @@ class ConfigApp(QWidget):
         self.sender_ip_textbox = QLineEdit()
         self.sender_ip_textbox.setText("25.119.38.155")
         self.receiver_ip_textbox = QLineEdit()
-        self.receiver_ip_textbox.setText("25.66.64.255")
+        self.receiver_ip_textbox.setText("25.143.96.131")
         self.access_key_textbox = QLineEdit()
         self.sender_ip_label = QLabel("Provide your IP address:")
         self.receiver_ip_label = QLabel("Provide receiver's IP address:")
@@ -35,6 +35,7 @@ class ConfigApp(QWidget):
 
     def _confirm_click(self):
         self.access_key = self.access_key_textbox.text()
+        self.config.access_key = self.access_key
         self.config.sender_ip = self.sender_ip_textbox.text()
         self.config.receiver_ip = self.receiver_ip_textbox.text()
         self.hide()
@@ -125,7 +126,6 @@ class MainApp(QWidget):
         message = self.message_textbox.toPlainText()
         encrypted_file = encryption.encrypt_message(message, self.encryption_mode)
         self.data_sender.send_file(encrypted_file, self.progress_bar)
-        # self.data_sender.send_message(message)
 
     def _set_encryption_mode(self):
         text = self.sender().text()

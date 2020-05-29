@@ -7,7 +7,7 @@ from Cryptodome.Cipher import AES, PKCS1_OAEP
 
 
 def hash_access_key(key):
-    return str(hashlib.sha256(key).hexdigest())
+    return str(hashlib.sha256(key.encode()).hexdigest())
 
 
 def generate_private_and_public_keys(access_key):
@@ -17,7 +17,7 @@ def generate_private_and_public_keys(access_key):
     hashed_access_key = hash_access_key(access_key)
 
     key = RSA.generate(2048)
-    private_key = key.export_key(passphrase=hashed_access_key)
+    private_key = key.export_key()
     public_key = key.publickey().export_key()
     with open(os.path.join(private_dir, "private.pem"), "wb") as private_key_file:
         private_key_file.write(private_key)
@@ -54,7 +54,7 @@ def _encrypt_data(data, mode=AES.MODE_EAX):
     enc_session_key = cipher_rsa.encrypt(session_key)
 
     # Encrypt the data with the AES session key
-    cipher_aes = AES.new(session_key, mode)
+    cipher_aes = AES.new(session_key, AES.MODE_EAX)
     ciphertext, tag = cipher_aes.encrypt_and_digest(data)
 
     with open(encrypted_file, "wb") as file_out:
@@ -64,7 +64,7 @@ def _encrypt_data(data, mode=AES.MODE_EAX):
     return encrypted_file
 
 
-def decrypt_data(encrypted_file, mode=AES.MODE_EAX):
+def decrypt_data(encrypted_file):
     private_dir = os.path.join(os.pardir, "keys", "private", "private.pem")
     private_key = RSA.import_key(open(private_dir).read())
 
@@ -78,6 +78,6 @@ def decrypt_data(encrypted_file, mode=AES.MODE_EAX):
 
     # Decrypt the data with the AES session key
     # TODO send and receive MODE_X
-    cipher_aes = AES.new(session_key, mode, nonce)
+    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
     data = cipher_aes.decrypt_and_verify(ciphertext, tag)
     print(data.decode("utf-8"))

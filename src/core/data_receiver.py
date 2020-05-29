@@ -31,7 +31,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
         else:
             file_path = os.path.join(os.pardir, "downloads")
         if not os.path.exists(file_path):
-            os.mkdir(file_path)
+            os.makedirs(file_path)
 
         with open(os.path.join(file_path, filename), "wb") as file:
             while True:

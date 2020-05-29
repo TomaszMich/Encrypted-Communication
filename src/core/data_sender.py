@@ -22,7 +22,7 @@ class DataSender:
         bytes_read_size = 0
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(self.address)
-            s.send(f"{filename}{SEPARATOR}{file_size}".encode())
+            s.send(f"{filename}{SEPARATOR}{file_size}".ljust(BUFFER_SIZE).encode())
             with open(filename, "rb") as file:
                 while True:
                     bytes_read = file.read(BUFFER_SIZE)
