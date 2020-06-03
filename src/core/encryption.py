@@ -20,7 +20,7 @@ def generate_private_and_public_keys(access_key):
     hashed_access_key = hash_access_key(access_key)
 
     key = RSA.generate(2048)
-    private_key = key.export_key(passphrase=hashed_access_key)
+    private_key = key.export_key(passphrase=hashed_access_key, protection="scryptAndAES128-CBC")
     public_key = key.publickey().export_key()
     with open(os.path.join(private_dir, "private.pem"), "wb") as private_key_file:
         private_key_file.write(private_key)
@@ -56,13 +56,13 @@ def _encrypt_data(data, mode):
     cipher_rsa = PKCS1_OAEP.new(recipient_key)
     enc_session_key = cipher_rsa.encrypt(session_key)
 
-    mode = 9
     # Encrypt the data with the AES session key
     cipher_aes = AES.new(session_key, mode)
-    ciphertext, tag = cipher_aes.encrypt_and_digest(pad(data, AES.block_size))
+    ciphertext = cipher_aes.encrypt(pad(data, AES.block_size))
 
+    iv = cipher_aes.iv if mode != AES.MODE_ECB else get_random_bytes(16)
     with open(encrypted_file, "wb") as file_out:
-        [file_out.write(x) for x in (enc_session_key, cipher_aes.nonce, tag, "{0:b}".format(mode).encode(), ciphertext)]
+        [file_out.write(x) for x in (enc_session_key, str(mode).encode(), iv, ciphertext)]
         file_out.close()
 
     return encrypted_file
@@ -73,17 +73,19 @@ def decrypt_data(encrypted_file, access_key):
     private_key = RSA.import_key(open(private_dir).read(), passphrase=hash_access_key(access_key))
 
     with open(encrypted_file, "rb") as file_in:
-        enc_session_key, nonce, tag, mode, ciphertext = \
-            [file_in.read(x) for x in (private_key.size_in_bytes(), 16, 16, 4, -1)]
+        enc_session_key, mode, iv, ciphertext = \
+            [file_in.read(x) for x in (private_key.size_in_bytes(), 1, 16, -1)]
 
     # Decrypt the session key with the private RSA key
     cipher_rsa = PKCS1_OAEP.new(private_key)
     session_key = cipher_rsa.decrypt(enc_session_key)
-    mode = int(mode, 2)
-    print(mode)
+    mode = int(mode.decode())
     # Decrypt the data with the AES session key
-    cipher_aes = AES.new(session_key, mode, nonce)
-    data = cipher_aes.decrypt_and_verify(unpad(ciphertext, AES.block_size), tag)
+    if mode == AES.MODE_ECB:
+        cipher_aes = AES.new(session_key, mode)
+    else:
+        cipher_aes = AES.new(session_key, mode, iv)
+    data = unpad(cipher_aes.decrypt(ciphertext), AES.block_size)
 
     if os.path.basename(encrypted_file) == MESSAGE:
         messagebox.showinfo(title="Received a message", message=f"New message:\n{data.decode()}")

@@ -86,10 +86,6 @@ class MainApp(QWidget):
         self.send_message_button.clicked.connect(self._send_message)
         self.exchange_keys_button.clicked.connect(self._exchange_keys)
         self.radio_button_ecb.setChecked(True)
-        self.radio_button_ecb.mode = MODE_ECB
-        self.radio_button_cbc.mode = MODE_CBC
-        self.radio_button_cfb.mode = MODE_CFB
-        self.radio_button_ofb.mode = MODE_OFB
         self.radio_button_ecb.toggled.connect(self._set_encryption_mode)
         self.radio_button_cbc.toggled.connect(self._set_encryption_mode)
         self.radio_button_cfb.toggled.connect(self._set_encryption_mode)
