@@ -18,9 +18,7 @@ class ConfigApp(QWidget):
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
         self.sender_ip_textbox = QLineEdit()
-        self.sender_ip_textbox.setText("25.119.38.155")
         self.receiver_ip_textbox = QLineEdit()
-        self.receiver_ip_textbox.setText("25.143.96.131")
         self.access_key_textbox = QLineEdit()
         self.sender_ip_label = QLabel("Provide your IP address:")
         self.receiver_ip_label = QLabel("Provide receiver's IP address:")
@@ -30,7 +28,7 @@ class ConfigApp(QWidget):
 
         self.setLayout(self.layout)
         self.setGeometry(1000, 600, 200, 100)
-        self.setWindowTitle('Welcome!')
+        self.setWindowTitle('Configuration')
         self.confirm_button.clicked.connect(self._confirm_click)
         self.show()
 
@@ -64,7 +62,7 @@ class MainApp(QWidget):
         self.data_receiver.start_receiving()
         self.layout = QGridLayout()
         self.layout.setSpacing(10)
-        self.browse_button = QPushButton('Browse')
+        self.browse_button = QPushButton('Browse files')
         self.send_file_button = QPushButton('Send file')
         self.send_message_button = QPushButton("Send message")
         self.exchange_keys_button = QPushButton("Exchange keys")
@@ -79,7 +77,7 @@ class MainApp(QWidget):
 
         self.setLayout(self.layout)
         self.setGeometry(700, 400, 400, 200)
-        self.setWindowTitle('Jakub Wlostowski & Tomasz Michalski')
+        self.setWindowTitle('Encrypted Communication')
 
         self.browse_button.clicked.connect(self._browse_files)
         self.send_file_button.clicked.connect(self._send_file)
@@ -98,11 +96,12 @@ class MainApp(QWidget):
         path = filename[0]
         self.dynamic_message.setText(f"Selected file:\n{path}")
         self.file_path = path
+        self.progress_bar.setValue(0)
 
     def _add_widgets(self):
         self.layout.addWidget(self.browse_button, 4, 3)
         self.layout.addWidget(self.send_file_button, 4, 4)
-        self.layout.addWidget(self.exchange_keys_button, 3, 3)
+        self.layout.addWidget(self.exchange_keys_button, 2, 4)
         self.layout.addWidget(self.progress_bar, 0, 0, 1, 0)
         self.layout.addWidget(self.radio_button_ecb, 1, 0)
         self.layout.addWidget(self.radio_button_cbc, 2, 0)
@@ -110,7 +109,7 @@ class MainApp(QWidget):
         self.layout.addWidget(self.radio_button_ofb, 4, 0)
         self.layout.addWidget(self.dynamic_message, 1, 1, 1, 3)
         self.layout.addWidget(self.message_textbox, 5, 0, 5, 4)
-        self.layout.addWidget(self.send_message_button, 5, 4)
+        self.layout.addWidget(self.send_message_button, 7, 4)
 
     def _send_file(self):
         if self.file_path == "":
